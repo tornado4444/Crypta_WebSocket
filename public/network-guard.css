@@ -1,0 +1,146 @@
+﻿.networkGuardBanner {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 9px 16px;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 195, 87, 0.55);
+  border-radius: 0;
+  background: linear-gradient(135deg, rgba(255, 195, 87, 0.18), rgba(255, 111, 120, 0.12));
+  color: var(--text);
+  box-shadow: none;
+  position: relative;
+  top: auto;
+  z-index: 9;
+}
+
+body.network-offline .networkGuardBanner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.networkGuardIcon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: #ffc357;
+  color: #13213d;
+  font-weight: 900;
+  flex: 0 0 auto;
+}
+
+.networkGuardCopy {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+}
+
+.networkGuardCopy strong {
+  font-size: 0.98rem;
+  white-space: nowrap;
+}
+
+.networkGuardCopy span,
+.networkGuardCopy small {
+  color: var(--muted);
+}
+
+.networkGuardCopy small:empty {
+  display: none;
+}
+
+.networkGuardBanner .ghostBtn {
+  justify-self: end;
+  min-width: max-content;
+  padding: 8px 12px;
+}
+
+body.network-offline .topbar {
+  z-index: 20;
+}
+
+.networkGuardChartBox {
+  position: relative;
+}
+
+.networkGuardChartNotice {
+  display: none;
+  position: absolute;
+  inset: 12px;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  border: 1px dashed rgba(255, 195, 87, 0.72);
+  border-radius: 12px;
+  background: rgba(7, 16, 31, 0.78);
+  color: #ffd98a;
+  font-weight: 800;
+  text-align: center;
+  z-index: 3;
+  pointer-events: none;
+}
+
+body.network-offline .networkGuardChartNotice {
+  display: flex;
+}
+
+body.network-offline .chartArea canvas,
+body.network-offline #sparkline {
+  opacity: 0.45;
+  filter: saturate(0.55);
+}
+
+[data-network-guard-disabled="true"] {
+  cursor: not-allowed !important;
+  opacity: 0.55 !important;
+}
+
+body.network-offline .featurePanel,
+body.network-offline .tablePanel,
+body.network-offline .exchangeSidebarPanel {
+  border-color: rgba(255, 195, 87, 0.32);
+}
+
+.marketGrid.networkGuardStaticSidebar > .exchangeSidebarPanel,
+.exchangeGrid.networkGuardStaticSidebar > .exchangeSidebarPanel,
+.marketGrid:has(.featureFullSpan) > .exchangeSidebarPanel,
+.exchangeGrid:has(.featureFullSpan) > .exchangeSidebarPanel {
+  position: static !important;
+  top: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  align-self: stretch;
+}
+
+.marketGrid.networkGuardStaticSidebar .exchangeSidebarPanel .statsList,
+.exchangeGrid.networkGuardStaticSidebar .exchangeSidebarPanel .statsList,
+.marketGrid:has(.featureFullSpan) .exchangeSidebarPanel .statsList,
+.exchangeGrid:has(.featureFullSpan) .exchangeSidebarPanel .statsList {
+  max-height: none !important;
+}
+
+.marketGrid.networkGuardStaticSidebar > .featureFullSpan,
+.exchangeGrid.networkGuardStaticSidebar > .featureFullSpan,
+.marketGrid:has(.featureFullSpan) > .featureFullSpan,
+.exchangeGrid:has(.featureFullSpan) > .featureFullSpan {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+@media (max-width: 760px) {
+  body.network-offline .networkGuardBanner {
+    grid-template-columns: auto 1fr;
+  }
+
+  .networkGuardBanner .ghostBtn {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    width: 100%;
+  }
+}

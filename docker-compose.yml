@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: crypta-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:16
+    container_name: crypta-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: crypta_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - crypta_pg_data:/var/lib/postgresql/data
+
+volumes:
+  crypta_pg_data:

@@ -1,0 +1,906 @@
+﻿<!doctype html>
+<html lang="uk" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CryptoAggregator Dashboard</title>
+    <link rel="stylesheet" href="/styles.css?v=report-center-20260529-2" />
+    <link rel="stylesheet" href="/features-overlay.css?v=features-20260524-2" />
+    <link rel="stylesheet" href="/network-guard.css?v=report-center-20260529-2" />
+    <link rel="stylesheet" href="/exchange-experience.css?v=trade-20260525-1" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brandWrap">
+        <div class="brandLogo">C</div>
+        <div class="brandText">
+          <strong>CryptoAggregator</strong>
+          <span data-i18n="brand.tagline">Market Data Hub</span>
+        </div>
+      </div>
+
+      <nav class="menu" aria-label="Main navigation">
+        <button class="menuBtn active" data-tab="crypto" type="button" data-i18n="menu.crypto">Cryptocurrencies</button>
+        <button class="menuBtn" data-tab="market" type="button" data-i18n="menu.market">Market</button>
+        <button class="menuBtn" data-tab="exchanges" type="button" data-i18n="menu.exchanges">Exchanges</button>
+        <button class="menuBtn" data-tab="trade" type="button" data-i18n="menu.trade">Trade</button>
+        <button class="menuBtn" data-tab="reports" type="button" data-i18n="menu.reports">Reports</button>
+        <a id="swaggerLink" class="menuLink hidden" href="/api-docs" target="_blank" rel="noreferrer">Swagger API</a>
+      </nav>
+
+      <div class="toolbar">
+        <input
+          id="symbolSearch"
+          class="searchInput"
+          data-i18n-placeholder="toolbar.searchPlaceholder"
+          placeholder="Search coin (BTC, ETH...)"
+        />
+        <select id="languageSelect" class="currencySelect" data-i18n-title="toolbar.languageTitle" title="Interface language"></select>
+        <select id="currencySelect" class="currencySelect" data-i18n-title="toolbar.currencyTitle" title="Display currency"></select>
+        <button id="themeToggle" class="ghostBtn" type="button">Theme: Light</button>
+        <span id="wsBadge" class="badge warn">WS: connecting</span>
+        <button id="adminBtn" class="ghostBtn hidden" type="button" data-i18n="toolbar.ownerPanel">Owner panel</button>
+        <button id="profileBtn" class="userChip userProfileBtn hidden" type="button">
+          <img id="profileChipAvatar" class="chipAvatar" alt="avatar" src="" />
+          <span id="profileChipName">Guest</span>
+        </button>
+        <button id="authActionBtn" class="ghostBtn" type="button" data-i18n="auth.actionOpen">Login / Register</button>
+      </div>
+    </header>
+
+    <div id="guestUnlockBanner" class="guestUnlockBanner hidden" role="status" aria-live="polite">
+      <div class="guestUnlockText">
+        <strong data-i18n="guest.bannerTitle">Unlock investor mode</strong>
+        <span data-i18n="guest.bannerText">Create an account to top up balance, invest in coins, and unlock analytics.</span>
+      </div>
+      <button id="guestUnlockBtn" class="primaryBtn guestUnlockBtn" type="button" data-i18n="guest.bannerAction">Create account</button>
+    </div>
+
+    <main class="layout">
+      <section class="summaryRow">
+        <article class="metricCard">
+          <h3 data-i18n="summary.trackedPairs">Tracked pairs</h3>
+          <p id="metricSymbols" class="metricValue">-</p>
+        </article>
+        <article class="metricCard">
+          <h3 data-i18n="summary.avgSpread">Average spread</h3>
+          <p id="metricSpread" class="metricValue">-</p>
+        </article>
+        <article class="metricCard">
+          <h3 data-i18n="summary.totalVolume">Total 24h volume</h3>
+          <p id="metricVolume" class="metricValue">-</p>
+        </article>
+        <article class="metricCard">
+          <h3 data-i18n="summary.activeExchanges">Active exchanges</h3>
+          <p id="metricExchanges" class="metricValue">-</p>
+        </article>
+      </section>
+
+      <section class="tabPane active" data-pane="crypto">
+        <div class="mainGrid">
+          <article class="panel tablePanel">
+            <div class="panelHead">
+              <h2 data-i18n="crypto.title">Top cryptocurrencies (aggregated)</h2>
+              <p data-i18n="crypto.subtitle">Normalization + aggregation from external exchanges via REST/WS</p>
+            </div>
+
+            <div class="tableWrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th data-i18n="table.rank">#</th>
+                    <th data-i18n="table.coin">Coin</th>
+                    <th data-i18n="table.ticker">Ticker</th>
+                    <th data-i18n="table.price">Price</th>
+                    <th data-i18n="table.bestBid">Best Bid</th>
+                    <th data-i18n="table.bestAsk">Best Ask</th>
+                    <th data-i18n="table.spread">Spread</th>
+                    <th data-i18n="table.quality">table.quality</th>
+                    <th data-i18n="table.updated">Updated</th>
+                    <th data-i18n="table.action">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="marketTableBody">
+                  <tr><td colspan="10" class="loading" data-i18n="common.loading">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <aside class="panel sidePanel" data-guest-lock="crypto-insights">
+            <div class="panelHead compact detailHead">
+              <div class="detailSymbolRow">
+                <img id="detailIcon" class="detailIcon" alt="coin" src="" />
+                <div>
+                  <h2 id="detailTitle">- / USDT</h2>
+                  <p id="detailSubtitle" data-i18n="common.selectRow">Select a row in the table</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="priceLine">
+              <span id="detailPrice" class="priceMain">-</span>
+              <span id="detailDelta" class="delta">-</span>
+            </div>
+
+            <canvas id="sparkline" width="420" height="170"></canvas>
+
+            <ul class="facts">
+              <li><span data-i18n="facts.bestBid">Best Bid</span><strong id="factBid">-</strong></li>
+              <li><span data-i18n="facts.bestAsk">Best Ask</span><strong id="factAsk">-</strong></li>
+              <li><span data-i18n="facts.spread">Spread</span><strong id="factSpread">-</strong></li>
+              <li><span data-i18n="facts.exchanges">Exchanges</span><strong id="factExchanges">-</strong></li>
+              <li><span data-i18n="facts.history">History (DB)</span><strong id="factHistoryCount">-</strong></li>
+            </ul>
+
+            <div class="leaders">
+              <h3 data-i18n="leaders.title">Top movers (local)</h3>
+              <ul id="leadersList">
+                <li data-i18n="leaders.empty">Not enough history yet</li>
+              </ul>
+            </div>
+
+
+            <div class="historyViewer">
+              <h3 data-i18n="history.viewerTitle">history.viewerTitle</h3>
+              <p id="historyPanelHint" class="muted" data-i18n="history.viewerHint">history.viewerHint</p>
+              <div class="tableWrap historyTableWrap">
+                <table class="historyTable">
+                  <thead>
+                    <tr>
+                      <th data-i18n="history.col.createdAt">history.col.createdAt</th>
+                      <th data-i18n="history.col.midPrice">history.col.midPrice</th>
+                      <th data-i18n="history.col.spread">history.col.spread</th>
+                      <th data-i18n="history.col.exchanges">history.col.exchanges</th>
+                    </tr>
+                  </thead>
+                  <tbody id="historyTableBody">
+                    <tr><td colspan="4" class="loading" data-i18n="history.noData">history.noData</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+
+      <section class="tabPane" data-pane="trade">
+        <div id="exchangeExperienceRoot" class="exchangeExperienceRoot">
+          <article class="panel">
+            <div class="panelHead">
+              <h2 data-i18n="menu.trade">Trade</h2>
+              <p>TradeFlow P2P</p>
+            </div>
+            <p class="loading">Loading...</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="tabPane" data-pane="reports">
+        <div class="reportsWorkspace">
+          <article class="panel reportHeroPanel">
+            <div class="reportHeroText">
+              <span class="reportEyebrow" data-i18n="reports.categoryEyebrow">Account intelligence</span>
+              <h2 data-i18n="reports.pageTitle">Reports center</h2>
+              <p data-i18n="reports.pageSubtitle">Generate shareable analytics for profile, portfolio, market quality, alerts and exchange health.</p>
+            </div>
+            <div class="reportHeroScore">
+              <span data-i18n="reports.lastScore">Latest score</span>
+              <strong id="reportHeroScoreValue">-</strong>
+            </div>
+          </article>
+
+          <section class="reportsGrid">
+            <article class="panel reportComposerPanel">
+              <div class="panelHead">
+                <h2 data-i18n="reports.composeTitle">Create report</h2>
+                <p data-i18n="reports.composeHint">Choose the report focus and send it to yourself, a teacher, a teammate, or download JSON.</p>
+              </div>
+
+              <div class="reportControlsGrid">
+                <label>
+                  <span data-i18n="reports.typeLabel">Report type</span>
+                  <select id="reportTypeSelect" class="currencySelect">
+                    <option value="full" data-i18n="reports.type.full">Full report</option>
+                    <option value="profile" data-i18n="reports.type.profile">Client profile</option>
+                    <option value="portfolio" data-i18n="reports.type.portfolio">Portfolio and P&L</option>
+                    <option value="market" data-i18n="reports.type.market">Market quality</option>
+                    <option value="security" data-i18n="reports.type.security">Alerts and automations</option>
+                  </select>
+                </label>
+                <label>
+                  <span data-i18n="reports.recipientLabel">Recipient emails</span>
+                  <input
+                    id="reportRecipientEmail"
+                    type="text"
+                    inputmode="email"
+                    autocomplete="email"
+                    data-i18n-placeholder="reports.recipientPlaceholder"
+                    placeholder="teacher@example.com, teammate@example.com"
+                  />
+                </label>
+                <label class="reportCheckbox">
+                  <input id="reportIncludeProfile" type="checkbox" checked />
+                  <span data-i18n="reports.includeProfile">Include client profile block</span>
+                </label>
+              </div>
+
+              <div class="reportToolbar">
+                <button id="reportGenerateBtn" class="ghostBtn" type="button" data-i18n="reports.generateBtn">Generate report</button>
+                <button id="reportEmailBtn" class="primaryBtn" type="button" data-i18n="reports.emailBtn">Send to email</button>
+                <button id="reportShareBtn" class="ghostBtn" type="button" data-i18n="reports.shareBtn">Create share link</button>
+                <button id="reportDownloadBtn" class="ghostBtn" type="button" data-i18n="reports.downloadBtn">Download JSON</button>
+                <button id="reportWordBtn" class="ghostBtn" type="button" data-i18n="reports.wordBtn">Download Word</button>
+                <button id="reportPdfBtn" class="ghostBtn" type="button" data-i18n="reports.pdfBtn">Download PDF</button>
+              </div>
+              <div id="reportShareBox" class="reportShareBox hidden">
+                <label>
+                  <span data-i18n="reports.shareUrlLabel">Network share link</span>
+                  <input id="reportShareUrl" type="text" readonly />
+                </label>
+                <button id="reportShareCopyBtn" class="ghostBtn" type="button" data-i18n="reports.shareCopy">Copy link</button>
+                <small data-i18n="reports.shareHint">Anyone on the network who can reach this server can open the report link.</small>
+              </div>
+              <p id="reportStatus" class="authStatus reportStatus"></p>
+            </article>
+
+            <article class="panel reportPreviewPanel">
+              <div class="panelHead">
+                <h2 data-i18n="reports.previewTitle">Report preview</h2>
+                <p data-i18n="reports.previewHint">The summary updates after generation and is also included in the email.</p>
+              </div>
+              <div id="reportSummary" class="reportSummaryGrid"></div>
+              <div class="reportInsightsBlock">
+                <h3 data-i18n="reports.insightsTitle">Smart insights</h3>
+                <ul id="reportInsightList" class="reportInsightList">
+                  <li data-i18n="reports.empty">Generate a report to see the summary here.</li>
+                </ul>
+              </div>
+            </article>
+          </section>
+
+          <section class="reportSectionCards">
+            <article class="reportSectionCard">
+              <strong data-i18n="reports.section.profileTitle">Client profile</strong>
+              <span data-i18n="reports.section.profileText">Name, email, owner status, wallet and profile snapshot.</span>
+            </article>
+            <article class="reportSectionCard">
+              <strong data-i18n="reports.section.portfolioTitle">Portfolio P&L</strong>
+              <span data-i18n="reports.section.portfolioText">Open positions, current value, unrealized profit and losses.</span>
+            </article>
+            <article class="reportSectionCard">
+              <strong data-i18n="reports.section.marketTitle">Market quality</strong>
+              <span data-i18n="reports.section.marketText">Tracked symbols, exchange coverage, stale data and source quality.</span>
+            </article>
+            <article class="reportSectionCard">
+              <strong data-i18n="reports.section.automationTitle">Alerts and webhooks</strong>
+              <span data-i18n="reports.section.automationText">Price alerts, webhook subscriptions and delivery readiness.</span>
+            </article>
+          </section>
+        </div>
+      </section>
+      <section class="tabPane" data-pane="market">
+        <div class="marketGrid">
+          <article class="panel exchangeSidebarPanel" data-guest-lock="market-chart">
+            <div class="panelHead">
+              <h2 data-i18n="market.title">Real-time chart</h2>
+              <p data-i18n="market.subtitle">Updated from WebSocket stream</p>
+              <div class="chartControls">
+                <label class="chartControl">
+                  <span data-i18n="market.chartSymbol">market.chartSymbol</span>
+                  <select id="marketSymbolSelect" class="currencySelect"></select>
+                </label>
+                <label class="chartControl">
+                  <span data-i18n="market.chartRange">market.chartRange</span>
+                  <select id="marketRangeSelect" class="currencySelect"></select>
+                </label>
+              </div>
+            </div>
+            <div class="chartArea">
+              <canvas id="marketChart" width="980" height="330"></canvas>
+            </div>
+          </article>
+
+          <article class="panel exchangeSidebarPanel" data-guest-lock="market-dynamics">
+            <div class="panelHead">
+              <h2 data-i18n="market.dynamicsTitle">Symbol dynamics</h2>
+              <p data-i18n="market.dynamicsSubtitle">Local ranking by price change</p>
+            </div>
+            <div class="tableWrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th data-i18n="market.symbol">Symbol</th>
+                    <th data-i18n="market.currentPrice">Current price</th>
+                    <th data-i18n="market.changeLocal">Change (local)</th>
+                    <th data-i18n="market.exchangeCount">Exchanges</th>
+                  </tr>
+                </thead>
+                <tbody id="moversTableBody">
+                  <tr><td colspan="4" class="loading" data-i18n="market.noData">No data</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="tabPane" data-pane="exchanges">
+        <div class="exchangeGrid">
+          <article class="panel" data-guest-lock="exchange-comparison">
+            <div class="panelHead">
+              <h2 data-i18n="exchanges.title">Exchange tick comparison</h2>
+              <p id="exchangePanelHint" data-i18n="exchanges.subtitle">Raw normalized ticks across exchanges</p>
+              <div class="exchangeControls">
+                <input
+                  id="exchangeSearchInput"
+                  class="searchInput exchangeSearchInput"
+                  data-i18n-placeholder="exchanges.searchPlaceholder"
+                  placeholder="Search exchange or symbol"
+                />
+                <select id="exchangeSourceFilter" class="currencySelect">
+                  <option value="all" data-i18n="exchanges.sourceFilter.all">exchanges.sourceFilter.all</option>
+                  <option value="ws" data-i18n="exchanges.sourceFilter.ws">exchanges.sourceFilter.ws</option>
+                  <option value="rest" data-i18n="exchanges.sourceFilter.rest">exchanges.sourceFilter.rest</option>
+                </select>
+                <select id="exchangeSortSelect" class="currencySelect">
+                  <option value="exchange_asc" data-i18n="exchanges.sort.exchangeAsc">exchanges.sort.exchangeAsc</option>
+                  <option value="exchange_desc" data-i18n="exchanges.sort.exchangeDesc">exchanges.sort.exchangeDesc</option>
+                  <option value="updated_desc" data-i18n="exchanges.sort.updatedDesc">exchanges.sort.updatedDesc</option>
+                  <option value="updated_asc" data-i18n="exchanges.sort.updatedAsc">exchanges.sort.updatedAsc</option>
+                  <option value="volume_desc" data-i18n="exchanges.sort.volumeDesc">exchanges.sort.volumeDesc</option>
+                  <option value="spread_desc" data-i18n="exchanges.sort.spreadDesc">exchanges.sort.spreadDesc</option>
+                </select>
+              </div>
+            </div>
+            <div class="tableWrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th data-i18n="exchanges.col.exchange">Exchange</th>
+                    <th data-i18n="exchanges.col.symbol">Symbol</th>
+                    <th data-i18n="exchanges.col.last">Last</th>
+                    <th data-i18n="exchanges.col.bid">Bid</th>
+                    <th data-i18n="exchanges.col.ask">Ask</th>
+                    <th data-i18n="exchanges.col.volume">24h volume</th>
+                    <th data-i18n="exchanges.col.source">Source</th>
+                    <th data-i18n="exchanges.col.updated">Updated</th>
+                  </tr>
+                </thead>
+                <tbody id="exchangeTableBody">
+                  <tr><td colspan="8" class="loading" data-i18n="common.loading">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+
+          <article class="panel exchangeSidebarPanel" data-guest-lock="exchange-health">
+            <div class="panelHead">
+              <h2 data-i18n="exchanges.statsTitle">Exchange statistics</h2>
+              <p data-i18n="exchanges.statsSubtitle">Symbol count, volume and precise share</p>
+            </div>
+            <div id="exchangeDetail" class="exchangeDetail"></div>
+            <ul id="exchangeStats" class="statsList">
+              <li data-i18n="exchanges.noData">No data</li>
+            </ul>
+            <div class="exchangeHealthSection">
+              <h3 data-i18n="exchanges.health.title">exchanges.health.title</h3>
+              <p data-i18n="exchanges.health.subtitle">exchanges.health.subtitle</p>
+              <div class="tableWrap">
+                <table class="exchangeHealthTable">
+                  <thead>
+                    <tr>
+                      <th data-i18n="exchanges.health.col.exchange">exchanges.health.col.exchange</th>
+                      <th data-i18n="exchanges.health.col.status">exchanges.health.col.status</th>
+                      <th data-i18n="exchanges.health.col.qualityScore">exchanges.health.col.qualityScore</th>
+                      <th data-i18n="exchanges.health.col.lastSuccess">exchanges.health.col.lastSuccess</th>
+                      <th data-i18n="exchanges.health.col.avgLatency">exchanges.health.col.avgLatency</th>
+                      <th data-i18n="exchanges.health.col.errors">exchanges.health.col.errors</th>
+                      <th data-i18n="exchanges.health.col.lastError">exchanges.health.col.lastError</th>
+                    </tr>
+                  </thead>
+                  <tbody id="exchangeHealthBody">
+                    <tr><td colspan="7" class="loading" data-i18n="exchanges.health.noData">exchanges.health.noData</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+    <div id="authModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Auth modal">
+      <div class="modalCard">
+        <button id="authCloseBtn" class="modalClose" type="button">X</button>
+        <h2 data-i18n="auth.modalTitle">Authorization</h2>
+        <p class="muted" data-i18n="auth.modalSubtitle">Registration and login for the client account</p>
+
+        <div class="authTabs">
+          <button id="tabRegisterBtn" class="authTab active" type="button" data-i18n="auth.tabRegister">Register</button>
+          <button id="tabLoginBtn" class="authTab" type="button" data-i18n="auth.tabLogin">Login</button>
+        </div>
+
+        <form id="registerForm" class="authForm">
+          <label>
+            <span data-i18n="auth.name">Name</span>
+            <input id="registerDisplayName" required minlength="2" maxlength="40" />
+          </label>
+          <label>
+            <span data-i18n="auth.email">Email</span>
+            <input id="registerEmail" type="email" required />
+          </label>
+          <label>
+            <span data-i18n="auth.password">Password</span>
+            <div class="passwordField">
+              <input id="registerPassword" type="password" required minlength="8" />
+              <button
+                id="registerPasswordToggle"
+                class="eyeBtn"
+                type="button"
+                data-i18n-title="password.toggleTitle"
+                title="Toggle password visibility"
+                aria-label="Toggle password visibility"
+              >
+                <svg class="eyeIcon eyeIconOpen" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7Z"/>
+                </svg>
+                <svg class="eyeIcon eyeIconClosed" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7Z"/>
+                  <path d="M4 4L20 20"/>
+                </svg>
+              </button>
+            </div>
+          </label>
+          <label>
+            <span data-i18n="auth.passwordConfirm">auth.passwordConfirm</span>
+            <div class="passwordField">
+              <input id="registerPasswordConfirm" type="password" required minlength="8" />
+              <button
+                id="registerPasswordConfirmToggle"
+                class="eyeBtn"
+                type="button"
+                data-i18n-title="password.toggleTitle"
+                title="Toggle password visibility"
+                aria-label="Toggle password confirmation visibility"
+              >
+                <svg class="eyeIcon eyeIconOpen" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7Z"/>
+                </svg>
+                <svg class="eyeIcon eyeIconClosed" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7Z"/>
+                  <path d="M4 4L20 20"/>
+                </svg>
+              </button>
+            </div>
+          </label>
+          <button type="submit" class="primaryBtn" data-i18n="auth.registerBtn">Create account</button>
+        </form>
+
+        <form id="loginForm" class="authForm hidden">
+          <label>
+            <span data-i18n="auth.email">Email</span>
+            <input id="loginEmail" type="email" required />
+          </label>
+          <label>
+            <span data-i18n="auth.password">Password</span>
+            <div class="passwordField">
+              <input id="loginPassword" type="password" required />
+              <button
+                id="loginPasswordToggle"
+                class="eyeBtn"
+                type="button"
+                data-i18n-title="password.toggleTitle"
+                title="Toggle password visibility"
+                aria-label="Toggle password visibility"
+              >
+                <svg class="eyeIcon eyeIconOpen" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7Z"/>
+                </svg>
+                <svg class="eyeIcon eyeIconClosed" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7Z"/>
+                  <path d="M4 4L20 20"/>
+                </svg>
+              </button>
+            </div>
+          </label>
+          <div class="authActionsRow">
+            <button id="forgotPasswordBtn" class="linkBtn" type="button" data-i18n="auth.forgotPassword">auth.forgotPassword</button>
+          </div>
+          <button type="submit" class="primaryBtn" data-i18n="auth.loginBtn">Sign in</button>
+        </form>
+
+        <form id="forgotPasswordForm" class="authForm hidden">
+          <p class="muted" data-i18n="auth.forgotHint">auth.forgotHint</p>
+
+          <div id="forgotStepRequest">
+            <label>
+              <span data-i18n="auth.email">Email</span>
+              <input id="forgotEmail" type="email" required />
+            </label>
+            <div class="authActionsRow">
+              <button id="forgotRequestCodeBtn" class="ghostBtn" type="button" data-i18n="auth.requestResetCodeBtn">auth.requestResetCodeBtn</button>
+            </div>
+          </div>
+
+          <div id="forgotStepVerify" class="hidden">
+            <label>
+              <span data-i18n="auth.resetCode">auth.resetCode</span>
+              <input
+                id="forgotResetCode"
+                type="text"
+                inputmode="numeric"
+                maxlength="6"
+                pattern="[0-9]{6}"
+                autocomplete="one-time-code"
+                data-i18n-placeholder="auth.resetCodePlaceholder"
+                placeholder="000000"
+              />
+            </label>
+            <div class="authActionsRow">
+              <button id="forgotVerifyCodeBtn" class="ghostBtn" type="button" data-i18n="auth.verifyResetCodeBtn">auth.verifyResetCodeBtn</button>
+              <button id="forgotResendCodeBtn" class="ghostBtn" type="button" data-i18n="auth.requestResetCodeBtn">auth.requestResetCodeBtn</button>
+            </div>
+          </div>
+
+          <div id="forgotStepReset" class="hidden">
+            <label>
+              <span data-i18n="auth.password">Password</span>
+              <div class="passwordField">
+                <input id="forgotPassword" type="password" minlength="8" />
+                <button
+                  id="forgotPasswordToggle"
+                  class="eyeBtn"
+                  type="button"
+                  data-i18n-title="password.toggleTitle"
+                  title="Toggle password visibility"
+                  aria-label="Toggle forgot password visibility"
+                >
+                  <svg class="eyeIcon eyeIconOpen" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7Z"/>
+                  </svg>
+                  <svg class="eyeIcon eyeIconClosed" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7Z"/>
+                    <path d="M4 4L20 20"/>
+                  </svg>
+                </button>
+              </div>
+            </label>
+            <label>
+              <span data-i18n="auth.passwordConfirm">auth.passwordConfirm</span>
+              <div class="passwordField">
+                <input id="forgotPasswordConfirm" type="password" minlength="8" />
+                <button
+                  id="forgotPasswordConfirmToggle"
+                  class="eyeBtn"
+                  type="button"
+                  data-i18n-title="password.toggleTitle"
+                  title="Toggle password visibility"
+                  aria-label="Toggle forgot password confirmation visibility"
+                >
+                  <svg class="eyeIcon eyeIconOpen" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7Z"/>
+                  </svg>
+                  <svg class="eyeIcon eyeIconClosed" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7Z"/>
+                    <path d="M4 4L20 20"/>
+                  </svg>
+                </button>
+              </div>
+            </label>
+            <div class="authActionsRow">
+              <button type="submit" class="primaryBtn" data-i18n="auth.resetPasswordBtn">auth.resetPasswordBtn</button>
+            </div>
+          </div>
+
+          <div class="authActionsRow">
+            <button id="forgotPasswordBackBtn" class="ghostBtn" type="button" data-i18n="auth.backToLogin">auth.backToLogin</button>
+          </div>
+        </form>
+
+        <p id="authStatus" class="authStatus"></p>
+      </div>
+    </div>
+
+
+    <div id="profileModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Profile modal">
+      <div class="modalCard profileWorkspaceCard">
+        <button id="profileCloseBtn" class="modalClose" type="button">X</button>
+        <div class="profileWorkspaceHeader">
+          <div class="profileWorkspaceIntro">
+            <h2 data-i18n="profile.modalTitle">profile.modalTitle</h2>
+            <p class="muted" data-i18n="profile.modalSubtitle">profile.modalSubtitle</p>
+          </div>
+          <div class="profileWorkspaceHeaderActions">
+            <button id="openWalletTopupBtn" class="ghostBtn profileToolbarBtn" type="button" data-i18n="profile.depositOpenModal">profile.depositOpenModal</button>
+            <button type="submit" form="profileForm" class="primaryBtn profileToolbarBtn" data-i18n="profile.saveBtn">profile.saveBtn</button>
+          </div>
+        </div>
+
+        <form id="profileForm" class="authForm profileWorkspaceForm">
+          <div class="profileWorkspaceLayout">
+            <aside class="profileWorkspaceSidebar">
+              <div class="avatarEditor profileHeroCard">
+                <img id="profileAvatarPreview" class="profileAvatarLarge" alt="profile avatar" src="" />
+                <label class="ghostBtn fileSelectBtn" for="profileAvatarInput" data-i18n="profile.uploadAvatar">profile.uploadAvatar</label>
+                <input
+                  id="profileAvatarInput"
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                  class="hidden"
+                />
+              </div>
+
+              <div class="profileIdentityGrid">
+                <label>
+                  <span data-i18n="profile.name">profile.name</span>
+                  <input id="profileDisplayName" required minlength="2" maxlength="40" />
+                </label>
+                <label>
+                  <span data-i18n="profile.email">profile.email</span>
+                  <input id="profileEmail" type="email" readonly />
+                </label>
+              </div>
+
+              <div id="ownerClaimSection" class="ownerClaimSection hidden">
+                <h4 data-i18n="owner.claimTitle">owner.claimTitle</h4>
+                <p class="muted" data-i18n="owner.claimHint">owner.claimHint</p>
+                <label>
+                  <span data-i18n="owner.setupKey">owner.setupKey</span>
+                  <div class="passwordField">
+                    <input id="ownerSetupKeyInput" type="password" autocomplete="off" />
+                    <button
+                      id="ownerSetupKeyToggle"
+                      class="eyeBtn"
+                      type="button"
+                      data-i18n-title="password.toggleTitle"
+                      title="Toggle password visibility"
+                      aria-label="Toggle owner key visibility"
+                    >
+                      <svg class="eyeIcon eyeIconOpen" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7Z"/>
+                      </svg>
+                      <svg class="eyeIcon eyeIconClosed" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Zm10 3.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7Z"/>
+                        <path d="M4 4L20 20"/>
+                      </svg>
+                    </button>
+                  </div>
+                </label>
+                <button id="ownerClaimBtn" class="ghostBtn ownerClaimBtn" type="button" data-i18n="owner.claimBtn">owner.claimBtn</button>
+              </div>
+
+              <div class="walletGrid">
+                <article class="walletCard">
+                  <h4 data-i18n="profile.walletFiat">profile.walletFiat</h4>
+                  <p id="profileBalanceUsd" class="walletValue">0.00</p>
+                </article>
+                <article class="walletCard">
+                  <h4 data-i18n="profile.walletBtc">profile.walletBtc</h4>
+                  <p id="profileBalanceBtc" class="walletValue">0 BTC</p>
+                </article>
+                <article class="walletCard">
+                  <h4 data-i18n="profile.walletEth">profile.walletEth</h4>
+                  <p id="profileBalanceEth" class="walletValue">0 ETH</p>
+                </article>
+              </div>
+
+              <div class="portfolioSummaryGrid">
+                <article class="walletCard portfolioSummaryCard">
+                  <h4 data-i18n="profile.availableCash">Available cash</h4>
+                  <p id="profileAvailableCash" class="walletValue">0.00</p>
+                </article>
+                <article class="walletCard portfolioSummaryCard">
+                  <h4 data-i18n="profile.portfolioValue">Portfolio value</h4>
+                  <p id="profilePortfolioValue" class="walletValue">0.00</p>
+                </article>
+                <article class="walletCard portfolioSummaryCard">
+                  <h4 data-i18n="profile.totalEquity">Total equity</h4>
+                  <p id="profileTotalEquity" class="walletValue">0.00</p>
+                </article>
+                <article class="walletCard portfolioSummaryCard">
+                  <h4 data-i18n="profile.openPositions">Open positions</h4>
+                  <p id="profileOpenPositions" class="walletValue">0</p>
+                </article>
+              </div>
+
+              <section class="profileActionSection profileSupportSection">
+                <div class="profileActionHead">
+                  <h3 data-i18n="profile.walletControlTitle">profile.walletControlTitle</h3>
+                  <p class="muted" data-i18n="profile.walletControlHint">profile.walletControlHint</p>
+                </div>
+                <div class="profileActionToolbar">
+                  <button id="openWalletTopupBtnSecondary" class="primaryBtn profileActionBtn" type="button" data-i18n="profile.depositOpenModal">profile.depositOpenModal</button>
+                </div>
+              </section>
+            </aside>
+
+            <section class="profileWorkspaceMain">
+              <section class="profileActionSection">
+                <div class="profileActionHead">
+                  <h3 data-i18n="profile.investTitle">Invest in a cryptocurrency</h3>
+                  <p class="muted" data-i18n="profile.investHint">Choose an asset, set an amount, and open a new portfolio position.</p>
+                </div>
+                <div class="profileActionGrid">
+                  <label class="profileField">
+                    <span data-i18n="profile.investSymbol">Asset</span>
+                    <select id="profileInvestSymbol" class="currencySelect"></select>
+                  </label>
+                  <label class="profileField">
+                    <span data-i18n="profile.investAmount">Investment amount</span>
+                    <input
+                      id="profileInvestAmount"
+                      type="text"
+                      inputmode="decimal"
+                      maxlength="14"
+                      data-i18n-placeholder="profile.investAmountPlaceholder"
+                      placeholder="0.00"
+                    />
+                  </label>
+                </div>
+                <div class="profileInvestMeta">
+                  <div class="profileInvestFact"><span data-i18n="profile.investPrice">Current price</span><strong id="profileInvestPrice">-</strong></div>
+                  <div class="profileInvestFact"><span data-i18n="profile.investUnits">Units to receive</span><strong id="profileInvestUnits">0 UNIT</strong></div>
+                  <div class="profileInvestFact"><span data-i18n="profile.availableCash">Available cash</span><strong id="profileCashAvailable">0.00</strong></div>
+                </div>
+                <button id="profileInvestBtn" class="primaryBtn profileActionBtn" type="button" data-i18n="profile.investAction">Invest now</button>
+              </section>
+
+              <section class="profileActionSection profileHoldingsSection">
+                <div class="profileActionHead">
+                  <h3 data-i18n="profile.holdingsTitle">Portfolio positions</h3>
+                  <p class="muted" data-i18n="profile.holdingsHint">Current holdings, invested capital, and live portfolio performance.</p>
+                </div>
+                <div id="profileHoldingsList" class="portfolioHoldingsList"></div>
+              </section>
+
+              <section class="profileActionSection profileHistorySection">
+                <div class="profileActionHead">
+                  <h3 data-i18n="profile.activityTitle">Operation history</h3>
+                  <p class="muted" data-i18n="profile.activityHint">This history shows your top-ups and investment actions.</p>
+                </div>
+                <div id="profileActivityHistory" class="profileActivityList"></div>
+              </section>
+            </section>
+          </div>
+        </form>
+
+        <p id="profileStatus" class="authStatus profileWorkspaceStatus"></p>
+      </div>
+    </div>
+
+    <div id="walletTopupModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Wallet top-up modal">
+      <div class="modalCard walletTopupCard">
+        <button id="walletTopupCloseBtn" class="modalClose" type="button">X</button>
+        <h2 data-i18n="profile.topupModalTitle">profile.topupModalTitle</h2>
+        <p class="muted" data-i18n="profile.topupModalSubtitle">profile.topupModalSubtitle</p>
+
+        <form id="walletTopupForm" class="authForm">
+          <div class="walletTopupGrid">
+            <label class="walletTopupWide">
+              <span data-i18n="profile.topupCardNumber">profile.topupCardNumber</span>
+              <input
+                id="topupCardNumber"
+                type="text"
+                inputmode="numeric"
+                autocomplete="cc-number"
+                maxlength="19"
+                data-i18n-placeholder="profile.topupCardNumberPlaceholder"
+                placeholder="4242 4242 4242 4242"
+              />
+            </label>
+
+            <label class="walletTopupWide">
+              <span data-i18n="profile.topupCardHolder">profile.topupCardHolder</span>
+              <input
+                id="topupCardHolder"
+                type="text"
+                autocomplete="cc-name"
+                maxlength="64"
+                data-i18n-placeholder="profile.topupCardHolderPlaceholder"
+                placeholder="Javier Escuella"
+              />
+            </label>
+
+            <label>
+              <span data-i18n="profile.topupExpiry">profile.topupExpiry</span>
+              <input
+                id="topupExpiry"
+                type="text"
+                inputmode="numeric"
+                autocomplete="cc-exp"
+                maxlength="5"
+                data-i18n-placeholder="profile.topupExpiryPlaceholder"
+                placeholder="12/30"
+              />
+            </label>
+
+            <label>
+              <span data-i18n="profile.topupCvv">profile.topupCvv</span>
+              <input
+                id="topupCvv"
+                type="password"
+                inputmode="numeric"
+                autocomplete="cc-csc"
+                maxlength="3"
+                data-i18n-placeholder="profile.topupCvvPlaceholder"
+                placeholder="123"
+              />
+            </label>
+
+            <label class="walletTopupWide">
+              <span data-i18n="profile.depositAmount">profile.depositAmount</span>
+              <input
+                id="walletTopupAmount"
+                type="text"
+                inputmode="decimal"
+                maxlength="14"
+                data-i18n-placeholder="profile.depositPlaceholder"
+                placeholder="0.00"
+              />
+            </label>
+          </div>
+
+          <div class="profilePresetGroup walletTopupPresets" aria-label="Top-up presets">
+            <button class="ghostBtn profilePresetBtn" type="button" data-topup-preset="100">+100</button>
+            <button class="ghostBtn profilePresetBtn" type="button" data-topup-preset="250">+250</button>
+            <button class="ghostBtn profilePresetBtn" type="button" data-topup-preset="500">+500</button>
+            <button class="ghostBtn profilePresetBtn" type="button" data-topup-preset="1000">+1000</button>
+          </div>
+
+          <button id="walletTopupSubmitBtn" type="submit" class="primaryBtn" data-i18n="profile.depositAction">profile.depositAction</button>
+        </form>
+
+        <p id="walletTopupStatus" class="authStatus"></p>
+      </div>
+    </div>
+
+    <div id="adminModal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Admin users modal">
+      <div class="modalCard adminModalCard">
+        <button id="adminCloseBtn" class="modalClose" type="button">X</button>
+        <h2 data-i18n="admin.modalTitle">Owner panel</h2>
+        <p class="muted" data-i18n="admin.modalSubtitle">View registered clients (owner access only)</p>
+
+        <div class="adminButtons">
+          <button id="adminRefreshBtn" type="button" class="primaryBtn" data-i18n="admin.showUsers">Show users</button>
+        </div>
+
+        <p id="adminStatus" class="authStatus"></p>
+
+        <div class="tableWrap adminUsersWrap">
+          <table>
+            <thead>
+              <tr>
+                <th data-i18n="admin.id">ID</th>
+                <th data-i18n="admin.avatar">admin.avatar</th>
+                <th data-i18n="admin.name">Name</th>
+                <th data-i18n="admin.email">Email</th>
+                <th data-i18n="admin.status">admin.status</th>
+                <th data-i18n="admin.created">Created</th>
+                <th data-i18n="admin.actions">admin.actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminUsersBody">
+              <tr><td colspan="7" class="loading" data-i18n="admin.noUsers">No users yet</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script src="/dashboard.js?v=trade-real-20260601-1"></script>
+    <script src="/language-complete.js?v=report-center-20260529-4"></script>
+    <script src="/features-overlay.js?v=offline-freeze-20260525-1"></script>
+    <script src="/network-guard.js?v=report-center-20260529-2"></script>
+    <script src="/exchange-experience.js?v=trade-real-20260601-1"></script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,39 @@
+﻿generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model MarketAggregateSnapshot {
+  id        BigInt   @id @default(autoincrement())
+  symbol    String   @db.VarChar(24)
+  bestBid   Float?
+  bestAsk   Float?
+  midPrice  Float?
+  spread    Float?
+  exchanges Json
+  updatedAt BigInt
+  createdAt DateTime @default(now())
+
+  @@index([symbol, createdAt(sort: Desc)])
+}
+
+model ClientUser {
+  id           BigInt   @id @default(autoincrement())
+  email        String   @unique @db.VarChar(190)
+  passwordHash String   @db.VarChar(255)
+  displayName  String   @db.VarChar(80)
+  avatarUrl    String?
+  balanceUsd   Float    @default(0)
+  balanceBtc   Float    @default(0)
+  balanceEth   Float    @default(0)
+  isBanned     Boolean  @default(false)
+  banReason    String?
+  bannedAt     DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+}
+

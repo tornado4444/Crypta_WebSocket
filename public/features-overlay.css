@@ -1,0 +1,405 @@
+﻿.featurePanel,
+.featureSection,
+.adminWsSection {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--panel) 88%, var(--panel-soft));
+}
+
+.featureFullSpan {
+  grid-column: 1 / -1;
+}
+
+.featureSectionHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.featureSectionHead h2,
+.featureSectionHead h3 {
+  margin: 0;
+}
+
+.featureSectionHead p {
+  margin: 6px 0 0;
+}
+
+.featureToolbar,
+.featureToolbarRow,
+.featureCheckRow,
+.featureActionRow,
+.adminActionGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.featureToolbarRow {
+  margin-bottom: 10px;
+}
+
+.featureSelect,
+.featureInput,
+.featureTextarea {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-soft);
+  color: var(--text);
+  padding: 9px 10px;
+  font: inherit;
+}
+
+.featureInput,
+.featureTextarea {
+  width: 100%;
+}
+
+.featureTextarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.featureTableWrap {
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.featureTable {
+  width: 100%;
+  min-width: 780px;
+  border-collapse: collapse;
+}
+
+.featureTable th,
+.featureTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  vertical-align: top;
+  text-align: left;
+}
+
+.featureTable tbody tr:hover {
+  background: color-mix(in srgb, var(--green) 10%, transparent);
+}
+
+.featureMiniMetricGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin-bottom: 12px;
+}
+
+.featureMiniMetricCard {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-soft);
+  padding: 10px 12px;
+}
+
+.featureMiniMetricCard span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-bottom: 6px;
+}
+
+.featureMiniMetricCard strong {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.featureList {
+  display: grid;
+  gap: 10px;
+}
+
+.featureRecordCard {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-soft);
+  padding: 12px;
+}
+
+.featureRecordTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.featureRecordTitle {
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.featureRecordSubtitle {
+  color: var(--muted);
+  font-size: 0.84rem;
+  margin-top: 4px;
+  word-break: break-word;
+}
+
+.featureFactsGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+}
+
+.featureFact span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-bottom: 4px;
+}
+
+.featureFact strong {
+  display: block;
+  word-break: break-word;
+}
+
+.featureChipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.featureChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 10px;
+  background: var(--panel-soft);
+}
+
+.featureChipButton,
+.featureChipRemove,
+.featureMiniButton,
+.successBtn {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+}
+
+.featureChipButton {
+  padding: 0;
+  border: 0;
+}
+
+.featureChipRemove,
+.featureMiniButton,
+.successBtn {
+  padding: 7px 10px;
+}
+
+.successBtn {
+  border-color: color-mix(in srgb, var(--green) 55%, black);
+  color: #ecfff5;
+  background: color-mix(in srgb, var(--green) 38%, transparent);
+}
+
+.featureBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--line) 55%, transparent);
+  color: var(--text);
+}
+
+.featureBadge.positive {
+  background: color-mix(in srgb, var(--green) 24%, transparent);
+  color: color-mix(in srgb, var(--green) 80%, white);
+}
+
+.featureBadge.negative {
+  background: color-mix(in srgb, var(--red) 22%, transparent);
+  color: color-mix(in srgb, var(--red) 75%, white);
+}
+
+.featureBadge.warn {
+  background: color-mix(in srgb, var(--amber) 26%, transparent);
+  color: color-mix(in srgb, var(--amber) 88%, white);
+}
+
+.featureInlineStatus {
+  min-height: 20px;
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.featureInlineStatus.error {
+  color: var(--red);
+}
+
+.featureInlineStatus.success {
+  color: var(--green);
+}
+
+.featureEmpty {
+  border: 1px dashed color-mix(in srgb, var(--line) 82%, transparent);
+  border-radius: 12px;
+  padding: 14px;
+  color: var(--muted);
+}
+
+.featureFormGrid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.featureFormGrid .profileField,
+.featureFormGrid label {
+  display: grid;
+  gap: 6px;
+}
+
+.featureFormGrid .featureFieldWide {
+  grid-column: 1 / -1;
+}
+
+.featureBooleanRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.featureBooleanRow input {
+  accent-color: var(--green);
+}
+
+.profileWorkspaceSidebar .featureSection {
+  padding: 14px;
+}
+
+.profileWorkspaceMain .featureSection {
+  padding: 14px;
+}
+
+.profileActionSection + .featureSection,
+.featureSection + .featureSection {
+  margin-top: 0;
+}
+
+.profileWorkspaceSidebar .featureChipList {
+  margin-top: 4px;
+}
+
+.adminWsSection {
+  margin-top: 14px;
+  padding: 14px;
+}
+
+.adminWsList .featureRecordCard {
+  padding: 10px 12px;
+}
+
+.adminWsMeta {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+
+.adminActionGroup {
+  justify-content: flex-end;
+}
+
+.featureToastStack {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 80;
+  display: grid;
+  gap: 10px;
+  width: min(380px, calc(100vw - 32px));
+}
+
+.featureToast {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: color-mix(in srgb, var(--panel) 92%, black 8%);
+  box-shadow: var(--shadow);
+}
+
+.featureToast strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.featureToast p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.featureToast.featureToast--success {
+  border-color: color-mix(in srgb, var(--green) 40%, var(--line));
+}
+
+.featureToast.featureToast--error {
+  border-color: color-mix(in srgb, var(--red) 40%, var(--line));
+}
+
+.swaggerOnlyOwner.hidden {
+  display: none !important;
+}
+
+@media (max-width: 1220px) {
+  .featureFormGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .featureSectionHead,
+  .featureToolbar,
+  .featureToolbarRow,
+  .featureCheckRow,
+  .featureActionRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .featureFormGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .featureTable {
+    min-width: 620px;
+  }
+}
+
+.featurePanel .featureTableWrap,
+.featureSection .featureTableWrap,
+.adminWsSection .featureTableWrap { max-width: 100%; }
+.featureSection .featureSelect,
+.featureSection .featureInput,
+.featurePanel .featureSelect,
+.featurePanel .featureInput { min-width: 0; }
+.featureRecordCard .featureRecordTitle,
+.featureRecordCard .featureRecordSubtitle,
+.featureFact strong { overflow-wrap: anywhere; }
+.featureFormGrid .featureCheckRow,
+.featureFormGrid .featureActionRow { grid-column: 1 / -1; }
+.featurePanel.featureFullSpan { width: 100%; }
+.featureMiniButton:disabled,
+.successBtn:disabled,
+.dangerBtn:disabled { cursor: not-allowed; opacity: 0.55; }
