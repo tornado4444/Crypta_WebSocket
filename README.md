@@ -1,23 +1,21 @@
-# CryptoAggregator Diploma MVP
+# CryptoAggregator WebSocket/RestAPI
 
-Тема: **Розробка сервісу агрегації та нормалізації криптовалютних ринкових даних з REST/WebSocket інтерфейсом**.
+## What is implemented
 
-## Что реализовано
-
-- Backend на `TypeScript + Node.js + Express`
-- Интеграция с 6 биржами: `Binance`, `Bybit`, `OKX`, `MEXC`, `KuCoin`, `Gate.io` + `mock` режим
-- Нормализация данных в единый формат
-- Агрегация (`bestBid`, `bestAsk`, `midPrice`, `spread`)
+- Backend on `TypeScript + Node.js + Express`
+- Integration with 6 exchanges: `Binance`, `Bybit`, `OKX`, `MEXC`, `KuCoin`, `Gate.io` + `mock` mode
+- Data normalization into a single format
+- Aggregation (`bestBid`, `bestAsk`, `midPrice`, `spread`)
 - REST API + WebSocket API
-- Swagger документация (`/api-docs`)
-- Сохранение истории агрегатов в PostgreSQL (через Prisma)
-- Регистрация/логин клиентов (JWT) + file fallback при недоступной БД
-- Owner-only просмотр зарегистрированных пользователей (`x-admin-key`)
-- UI Dashboard с вкладками `Криптовалюти / Ринок / Біржі`
-- Переключение тем (`dark/light`)
-- Переключение валют отображения (`USD`, `EUR`, `UAH` и др.)
-- Графики в реальном времени (canvas + WS)
-- Иконки монет и бирж, улучшенная биржевая аналитика
+- Swagger documentation (`/api-docs`)
+- Saving the history of aggregates in PostgreSQL (via Prisma)
+- Customer registration/login (JWT) + backup file when the database is unavailable
+- Viewing registered users only for the owner (`x-admin-key`)
+- UI Dashboard with `Cryptocurrencies / Market / Exchanges` tabs
+- Theme switching (`dark/light`)
+- Currency display transition (`USD`, `EUR`, `UAH`, etc.)
+- Charts in real-time (canvas + WS)
+- Coin and exchange icons, improved exchange analytics
 
 ## Запуск
 
